@@ -1,4 +1,4 @@
-# A statically generated blog example using Next.js and Markdown
+# A statically generated blog example using Next.js and Markdown 
 
 This example showcases Next.js's [Static Generation](https://nextjs.org/docs/basic-features/pages) feature using Markdown files as the data source.
 
