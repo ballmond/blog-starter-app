@@ -33,5 +33,5 @@ yarn-error.log*
 # vercel
 .vercel
 
-# netlify
-/.netlify/
+# Local Netlify folder
+.netlify
