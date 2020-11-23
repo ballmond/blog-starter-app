@@ -1,7 +1,6 @@
 import Container from '../components/container'
 import MoreStories from '../components/more-stories'
 import HeroPost from '../components/hero-post'
-import Intro from '../components/intro'
 import Layout from '../components/layout'
 import { getAllPosts } from '../lib/api'
 import Head from 'next/head'
@@ -14,10 +13,13 @@ export default function Index({ allPosts }) {
     <>
       <Layout>
         <Head>
-          <title>Next.js Blog Example with {CMS_NAME}</title>
+          <title>{CMS_NAME}</title>
         </Head>
         <Container>
-          <Intro />
+          {/* <Hero
+            title={CMS_NAME}
+            coverImage="/assets/blog/images/IZZY-958x458.png"
+          /> */}
           {heroPost && (
             <HeroPost
               title={heroPost.title}

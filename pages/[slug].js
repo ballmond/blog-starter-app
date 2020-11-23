@@ -1,14 +1,11 @@
 import { useRouter } from 'next/router'
 import ErrorPage from 'next/error'
-import Container from '../../components/container'
-import PostBody from '../../components/post-body'
-import PostHeader from '../../components/post-header'
-import Layout from '../../components/layout'
-import { getPostBySlug, getAllPosts } from '../../lib/api'
-import PostTitle from '../../components/post-title'
-import Head from 'next/head'
-import { CMS_NAME } from '../../lib/constants'
-import markdownToHtml from '../../lib/markdownToHtml'
+import Container from '../components/container'
+import PostBody from '../components/post-body'
+import Layout from '../components/layout'
+import PostTitle from '../components/post-title'
+import markdownToHtml from '../lib/markdownToHtml'
+import { getPageBySlug, getAllPages } from '../lib/api'
 
 export default function Post({ post, morePosts, preview }) {
   const router = useRouter()
@@ -23,18 +20,6 @@ export default function Post({ post, morePosts, preview }) {
         ) : (
           <>
             <article className="mb-32">
-              <Head>
-                <title>
-                  {post.title} | {CMS_NAME}
-                </title>
-                <meta property="og:image" content={post.ogImage.url} />
-              </Head>
-              <PostHeader
-                title={post.title}
-                coverImage={post.coverImage}
-                date={post.date}
-                author={post.author}
-              />
               <PostBody content={post.content} />
             </article>
           </>
@@ -45,7 +30,7 @@ export default function Post({ post, morePosts, preview }) {
 }
 
 export async function getStaticProps({ params }) {
-  const post = getPostBySlug(params.slug, [
+  const post = getPageBySlug(params.slug, [
     'title',
     'date',
     'slug',
@@ -67,7 +52,7 @@ export async function getStaticProps({ params }) {
 }
 
 export async function getStaticPaths() {
-  const posts = getAllPosts(['slug'])
+  const posts = getAllPages(['slug'])
 
   return {
     paths: posts.map((post) => {
