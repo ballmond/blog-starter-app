@@ -35,3 +35,7 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+
+# sanity
+/studio/node_modules
+/studio/.env*
