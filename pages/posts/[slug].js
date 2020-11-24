@@ -1,7 +1,6 @@
 import groq from 'groq'
 import client from '../../client/sanityClient'
-import imageUrlBuilder from '@sanity/image-url'
-import BlockContent from '@sanity/block-content-to-react'
+import { urlFor } from '../../lib/sanityHelper'
 import { useRouter } from 'next/router'
 import ErrorPage from 'next/error'
 import Container from '../../components/container'
@@ -11,10 +10,6 @@ import Layout from '../../components/layout'
 import PostTitle from '../../components/post-title'
 import Head from 'next/head'
 import { CMS_NAME } from '../../lib/constants'
-
-function urlFor(source) {
-  return imageUrlBuilder(client).image(source)
-}
 
 export default function Post({ post, preview }) {
   const router = useRouter()
@@ -35,7 +30,7 @@ export default function Post({ post, preview }) {
                 </title>
                 <meta
                   property="og:image"
-                  content={post.ogImage && urlFor(post.ogImage.url)}
+                  content={post.ogImage && urlFor(post.ogImage).url()}
                 />
               </Head>
               <PostHeader
@@ -45,11 +40,6 @@ export default function Post({ post, preview }) {
                 author={post.author}
               />
               <PostBody content={post.content} />
-              <BlockContent
-                blocks={post.content}
-                imageOptions={{ w: 320, h: 240, fit: 'max' }}
-                {...client.config()}
-              />
             </article>
           </>
         )}
@@ -84,7 +74,7 @@ export async function getStaticProps({ params }) {
       },
     },
   }
-  // console.log(props)
+
   return props
 }
 
@@ -93,7 +83,6 @@ export async function getStaticPaths() {
     groq`*[_type == "post"]{"slug": slug.current}`
   )
 
-  // console.log(posts)
   return {
     paths: posts.map((post) => {
       return {
