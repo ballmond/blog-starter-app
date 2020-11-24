@@ -1,16 +1,22 @@
+import groq from 'groq'
+import client from '../../client/sanityClient'
+import imageUrlBuilder from '@sanity/image-url'
+import BlockContent from '@sanity/block-content-to-react'
 import { useRouter } from 'next/router'
 import ErrorPage from 'next/error'
 import Container from '../../components/container'
 import PostBody from '../../components/post-body'
 import PostHeader from '../../components/post-header'
 import Layout from '../../components/layout'
-import { getPostBySlug, getAllPosts } from '../../lib/api'
 import PostTitle from '../../components/post-title'
 import Head from 'next/head'
 import { CMS_NAME } from '../../lib/constants'
-import markdownToHtml from '../../lib/markdownToHtml'
 
-export default function Post({ post, morePosts, preview }) {
+function urlFor(source) {
+  return imageUrlBuilder(client).image(source)
+}
+
+export default function Post({ post, preview }) {
   const router = useRouter()
   if (!router.isFallback && !post?.slug) {
     return <ErrorPage statusCode={404} />
@@ -27,15 +33,23 @@ export default function Post({ post, morePosts, preview }) {
                 <title>
                   {post.title} | {CMS_NAME}
                 </title>
-                <meta property="og:image" content={post.ogImage.url} />
+                <meta
+                  property="og:image"
+                  content={post.ogImage && urlFor(post.ogImage.url)}
+                />
               </Head>
               <PostHeader
                 title={post.title}
-                coverImage={post.coverImage}
+                coverImage={urlFor(post.coverImage)}
                 date={post.date}
                 author={post.author}
               />
               <PostBody content={post.content} />
+              <BlockContent
+                blocks={post.content}
+                imageOptions={{ w: 320, h: 240, fit: 'max' }}
+                {...client.config()}
+              />
             </article>
           </>
         )}
@@ -44,31 +58,42 @@ export default function Post({ post, morePosts, preview }) {
   )
 }
 
-export async function getStaticProps({ params }) {
-  const post = getPostBySlug(params.slug, [
-    'title',
-    'date',
-    'slug',
-    'author',
-    'content',
-    'ogImage',
-    'coverImage',
-  ])
-  const content = await markdownToHtml(post.content || '')
+const query = groq`*[_type == "post" && slug.current == $slug][0]{
+  title,
+  "author": author->name,
+  "categories": categories[]->title,
+  "authorImage": author->image,
+  "slug": slug.current,
+  "coverImage": mainImage,
+  "ogImage": mainImage,
+  "date": publishedAt,
+  "content": body
+}`
 
-  return {
+export async function getStaticProps({ params }) {
+  const { slug = '' } = params
+  const res = await client.fetch(query, { slug })
+  const props = {
     props: {
       post: {
-        ...post,
-        content,
+        ...res,
+        author: {
+          name: res.author,
+          picture: res.authorImage,
+        },
       },
     },
   }
+  // console.log(props)
+  return props
 }
 
 export async function getStaticPaths() {
-  const posts = getAllPosts(['slug'])
+  const posts = await client.fetch(
+    groq`*[_type == "post"]{"slug": slug.current}`
+  )
 
+  // console.log(posts)
   return {
     paths: posts.map((post) => {
       return {
