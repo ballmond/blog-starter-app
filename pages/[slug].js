@@ -20,7 +20,8 @@ export default function Post({ post, morePosts, preview }) {
         ) : (
           <>
             <article className="mb-32">
-              <PostBody content={post.content} />
+              {/* <PostBody content={post.content} /> */}
+              <h2>todotodotodo</h2>
             </article>
           </>
         )}
